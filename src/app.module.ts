@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PostModule } from './post/post.module';
 import { MailModule } from './mail/mail.module';
 import { GoogleStrategy } from './auth/strategy/google.strategy';
+import { AppController } from './app.controller';
 
 @Module({
    imports: [
@@ -24,6 +25,7 @@ import { GoogleStrategy } from './auth/strategy/google.strategy';
       PostModule,
       MailModule,
    ],
+   controllers: [AppController],
    providers: [GoogleStrategy]
 })
 export class AppModule { }
