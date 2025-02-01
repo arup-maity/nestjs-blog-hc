@@ -33,6 +33,7 @@ export class AuthController {
          sameSite: 'strict',
          httpOnly: false,
          secure: true,
+         domnain: process.env.ENVIRONMENT !== 'production' ? 'localhost' : '.arupmaity.in'
       });
       return res.status(200).json({ success: true, user: result.payload, message: 'Login successful' });
    }
@@ -53,10 +54,11 @@ export class AuthController {
             sameSite: 'strict',
             httpOnly: false,
             secure: true,
+            domnain: process.env.ENVIRONMENT !== 'production' ? 'localhost' : '.arupmaity.in'
          });
-         return res.status(302).redirect('http://localhost:3001');
+         return res.status(302).redirect('https://her-conversation.arupmaity.in');
       } catch (error) {
-         return res.status(302).redirect('http://localhost:3001?user=not-found');
+         return res.status(302).redirect('https://her-conversation.arupmaity.in/?user=not-found');
       }
    }
 
