@@ -1,0 +1,235 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+   provider = "prisma-client-js"
+}
+
+datasource db {
+   provider = "postgresql"
+   url      = env("DATABASE_URL")
+}
+
+// user tables
+model Users {
+   id               Int            @id @default(autoincrement())
+   name             String?        @default("")
+   display_name     String?        @default("")
+   email            String         @unique
+   userPassword     UserPassword?
+   username         String         @unique
+   pronouns         String?        @default("")
+   role             UserRole       @default(user)
+   is_active        Boolean        @default(false)
+   is_author        Boolean        @default(false)
+   email_verified   Boolean        @default(false)
+   avatar           String?        @default("")
+   country          String?        @default("")
+   address          String?        @default("")
+   bio              String?        @default("")
+   about            String?        @default("")
+   good_reads       String?        @default("")
+   social_media     Json?          @default("{}")
+   userMeta         UserMeta[]
+   following_count  Int            @default(0)
+   following        Follower[]     @relation("Following")
+   followers_count  Int            @default(0)
+   followers        Follower[]     @relation("Followers")
+   posts            Posts[]
+   becomeAuthor     BecomeAuthor?
+   savedPosts       SavedPosts[]
+   likePost         LikePost[]
+   comment          Comment[]
+   selectedCategory userCategory[]
+   createdAt        DateTime       @default(now())
+   updatedAt        DateTime       @updatedAt
+
+   @@index([id, username])
+}
+
+enum UserRole {
+   user
+   administrator
+   admin
+   author
+}
+
+model UserPassword {
+   id       Int    @id @default(autoincrement())
+   password String
+   method   String @default("password")
+   userId   Int    @unique
+   user     Users  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model UserMeta {
+   id        Int    @id @default(autoincrement())
+   metaKey   String
+   metaValue String
+   userId    Int
+   user      Users  @relation(fields: [userId], references: [id])
+}
+
+model BecomeAuthor {
+   id             Int                @id @default(autoincrement())
+   motivation     String
+   topics         String
+   categories     userCategory[]
+   other_category String?            @default("")
+   previous_works String             @default("")
+   work_file      String             @default("")
+   status         BecomeAuthorStatus @default(pending)
+   userId         Int                @unique
+   user           Users              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   createdAt      DateTime           @default(now())
+   updatedAt      DateTime           @updatedAt
+}
+
+enum BecomeAuthorStatus {
+   pending
+   approved
+   rejected
+}
+
+model userCategory {
+   id             Int           @id @default(autoincrement())
+   userId         Int
+   user           Users         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   categoryId     Int
+   category       Taxonomy      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+   becomeAuthorId Int?
+   becomeAuthor   BecomeAuthor? @relation(fields: [becomeAuthorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   createdAt      DateTime      @default(now())
+   updatedAt      DateTime      @updatedAt
+}
+
+// 
+model Follower {
+   id          Int      @id @default(autoincrement())
+   followerId  Int
+   following   Users    @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   followingId Int
+   follower    Users    @relation("Following", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   createdAt   DateTime @default(now())
+
+   @@unique([followerId, followingId])
+   @@index([followerId, followingId])
+}
+
+model SavedPosts {
+   id        Int      @id @default(autoincrement())
+   userId    Int
+   user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   postId    Int
+   post      Posts    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   createdAt DateTime @default(now())
+
+   @@unique([userId, postId])
+   @@index([userId, postId])
+}
+
+// Taxonomy 
+model Taxonomy {
+   id           Int            @id @default(autoincrement())
+   name         String
+   slug         String         @unique
+   description  String?
+   thumbnail    String?
+   parentId     Int?
+   post_type    String         @default("post")
+   type         TaxonomyType   @default(category)
+   count        Int            @default(0)
+   parent       Taxonomy?      @relation("parentRelation", fields: [parentId], references: [id])
+   taxonomy     Taxonomy[]     @relation("parentRelation")
+   postTaxonomy PostTaxonomy[]
+   userCategory userCategory[]
+   createdAt    DateTime       @default(now())
+   updatedAt    DateTime       @updatedAt
+
+   @@index([id, slug])
+}
+
+enum TaxonomyType {
+   category
+   tag
+}
+
+model PostTaxonomy {
+   id         Int      @id @default(autoincrement())
+   postId     Int
+   post       Posts    @relation(fields: [postId], references: [id], onDelete: Cascade)
+   taxonomyId Int
+   taxonomy   Taxonomy @relation(fields: [taxonomyId], references: [id], onDelete: Cascade)
+
+   @@unique([postId, taxonomyId])
+}
+
+// Post
+model Posts {
+   id               Int            @id @default(autoincrement())
+   title            String
+   slug             String         @unique
+   content          String
+   type             String         @default("post")
+   status           PostStatus     @default(draft)
+   schedule_time    DateTime       @default(now())
+   meta_title       String?        @default("")
+   meta_description String?        @default("")
+   meta_keywords    String?        @default("")
+   excerpt          String?        @default("")
+   thumbnail        String?        @default("")
+   authorId         Int
+   author           Users          @relation(fields: [authorId], references: [id])
+   categories       PostTaxonomy[]
+   // tags             PostTaxonomy[]
+   headings_list    Json           @default("[]")
+   read_time        Int            @default(0)
+   comment          Comment[]
+   comment_count    Int            @default(0)
+   savedPosts       SavedPosts[]
+   save_count       Int            @default(0)
+   likePost         LikePost[]
+   like_count       Int            @default(0)
+   createdAt        DateTime       @default(now())
+   updatedAt        DateTime       @updatedAt
+
+   @@index([id, slug])
+}
+
+enum PostStatus {
+   draft
+   pending
+   published
+   unpublished
+   schedule
+   trash
+   rejected
+}
+
+model LikePost {
+   id        Int      @id @default(autoincrement())
+   userId    Int
+   user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   postId    Int
+   post      Posts    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   createdAt DateTime @default(now())
+
+   @@unique([userId, postId])
+}
+
+model Comment {
+   id        Int       @id @default(autoincrement())
+   content   String
+   userId    Int
+   user      Users     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   postId    Int
+   post      Posts     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+   parentId  Int?
+   parent    Comment?  @relation("ReplyRelation", fields: [parentId], references: [id])
+   replies   Comment[] @relation("ReplyRelation")
+   createdAt DateTime  @default(now())
+   updatedAt DateTime  @updatedAt
+}
