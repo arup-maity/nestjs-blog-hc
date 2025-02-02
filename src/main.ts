@@ -35,7 +35,6 @@ async function bootstrap() {
       .setTitle('Her Conversation Api Documentation')
       .setDescription('The Her Conversation API description')
       .setVersion('1.0')
-      // .addTag('cats')
       .build();
    const documentFactory = () => SwaggerModule.createDocument(app, config);
    SwaggerModule.setup('api-doc', app, documentFactory);
