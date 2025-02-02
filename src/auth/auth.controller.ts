@@ -5,12 +5,14 @@ import { AuthGuard } from './guard/auth.guard';
 import { UserAuthGuard } from './guard/user.auth.guard';
 import { MailService } from 'src/mail/mail.service';
 import { GoogleOAuthGuard } from './strategy/google-oauth.guard';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('api/auth')
 export class AuthController {
    constructor(
       private readonly authService: AuthService,
-      private mailService: MailService
+      private mailService: MailService,
+      private configService: ConfigService,
    ) { }
 
    @Post('user-register')
@@ -56,6 +58,7 @@ export class AuthController {
             secure: true,
             domnain: process.env.ENVIRONMENT !== 'production' ? 'localhost' : '.arupmaity.in'
          });
+         const redirectUrl = this.configService.get('')
          return res.status(302).redirect('https://her-conversation.arupmaity.in');
       } catch (error) {
          return res.status(302).redirect('https://her-conversation.arupmaity.in/?user=not-found');

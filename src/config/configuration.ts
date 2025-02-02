@@ -41,5 +41,13 @@ export default () => ({
       form_email: 'arupmaity079@gmail.com',
       form_name: 'Arup Maity'
    },
-   app_url: 'http://localhost:3001/'
+   app_url: 'http://localhost:3001/',
+
+   // google login credentials
+   google_auth: {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.ENVIRONMENT === 'production' ? 'https://herconversationapi.server.arupmaity.in/api/auth/google-callback' : 'http://localhost:8050/api/auth/google-callback',
+      scope: ['email', 'profile'],
+   }
 });
