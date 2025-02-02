@@ -16,7 +16,8 @@ async function bootstrap() {
          'http://localhost:5173',
          'http://localhost:3000',
          'http://localhost:3001',
-         'https://her-conversation.arupmaity.in'
+         'https://her-conversation.arupmaity.in',
+         'https://admin-conversation.arupmaity.in'
       ],
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
       credentials: true,

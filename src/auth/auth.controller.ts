@@ -35,7 +35,7 @@ export class AuthController {
          sameSite: 'strict',
          httpOnly: false,
          secure: true,
-         domnain: process.env.ENVIRONMENT !== 'production' ? 'localhost' : '.arupmaity.in'
+         domain: process.env.ENVIRONMENT !== 'production' ? 'localhost' : '.arupmaity.in'
       });
       return res.status(200).json({ success: true, user: result.payload, message: 'Login successful' });
    }
@@ -56,12 +56,13 @@ export class AuthController {
             sameSite: 'strict',
             httpOnly: false,
             secure: true,
-            domnain: process.env.ENVIRONMENT !== 'production' ? 'localhost' : '.arupmaity.in'
+            domain: process.env.ENVIRONMENT === 'production' ? '.arupmaity.in' : 'localhost'
          });
-         const redirectUrl = this.configService.get('')
-         return res.status(302).redirect('https://her-conversation.arupmaity.in');
+         const redirectUrl = process.env.ENVIRONMENT === 'production' ? 'https://her-conversation.arupmaity.in' : 'http://localhost:3001'
+         return res.status(302).redirect(redirectUrl);
       } catch (error) {
-         return res.status(302).redirect('https://her-conversation.arupmaity.in/?user=not-found');
+         const redirectUrl = process.env.ENVIRONMENT === 'production' ? 'https://her-conversation.arupmaity.in' : 'http://localhost:3001'
+         return res.status(302).redirect(redirectUrl);
       }
    }
 
