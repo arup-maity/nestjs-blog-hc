@@ -124,6 +124,18 @@ export class UserController {
       }
    }
 
+   @UseGuards(UserAuthGuard)
+   @Get('/saved-post')
+   async savedPosts(@Request() req, @Response() res, @Param() params) {
+      try {
+         const user = req.user
+         const savedPosts = await this.userService.savedPosts(user.id, params)
+         return res.status(200).json({ success: true, savedPosts, message: 'Saved posts read successfully' })
+      } catch (error) {
+         throw error
+      }
+   }
+
    // ############################# Become Author #############################
 
    @UseGuards(UserAuthGuard)

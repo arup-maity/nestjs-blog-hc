@@ -130,6 +130,70 @@ export class UserService {
       return !!result
    }
 
+   async savedPosts(userId: number, queryParameter: any) {
+      const {
+         page = 1,
+         limit = 25,
+         sortColumn = 'createdAt',
+         sortOrder = 'desc',
+         type = "article",
+         category = 'all'
+      } = queryParameter
+
+      const whereCondition: any = {
+         userId: +userId,
+         post: {
+            type: type
+         }
+      };
+      if (category && category !== 'all') {
+         whereCondition.post.categories = {
+            some: {
+               taxonomyId: +category
+            }
+         };
+      }
+
+      const savedPosts = await this.prisma.savedPosts.findMany({
+         where: whereCondition,
+         include: {
+            post: {
+               select: {
+                  id: true,
+                  title: true,
+                  slug: true,
+                  excerpt: true,
+                  type: true,
+                  thumbnail: true,
+                  createdAt: true,
+                  // categories: {
+                  //    select: {
+                  //       taxonomy: {
+                  //          select: {
+                  //             id: true,
+                  //             name: true,
+                  //             slug: true,
+                  //          }
+                  //       }
+                  //    }
+                  // },
+                  author: {
+                     select: {
+                        id: true,
+                        name: true,
+                        username: true
+                     }
+                  }
+               }
+            }
+         },
+         take: +limit,
+         skip: (+page - 1) * +limit,
+         orderBy: { [sortColumn]: sortOrder === 'asc' ? 'asc' : 'desc' },
+      })
+      return savedPosts
+   }
+
    // ##############################  old ###########################
    // ####################################################################
    async getUserById(id: string) {
