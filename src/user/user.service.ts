@@ -290,9 +290,20 @@ export class UserService {
 
    async readBecomeAuthor(id: string) {
       const author = await this.prisma.becomeAuthor.findUnique({
-         where: { userId: +id },
+         where: { id: +id },
          include: {
-            user: true
+            user: true,
+            categories: {
+               include: {
+                  category: {
+                     select: {
+                        id: true,
+                        name: true,
+                        slug: true
+                     }
+                  }
+               }
+            }
          }
       })
       if (!author) {

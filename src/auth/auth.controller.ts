@@ -88,7 +88,7 @@ export class AuthController {
       res.cookie('token', result?.access_token, {
          expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
          sameSite: 'strict',
-         httpOnly: true,
+         httpOnly: false,
          secure: true,
       });
       return res.status(200).json({ success: true, token: result.access_token, message: 'Login successful' });
